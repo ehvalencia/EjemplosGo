@@ -9,6 +9,7 @@ import (
 	handler "github.com/ehvalencia/EjemplosGo/EjemplosGo/goWeb/Api/cmd/handlers"
 	"github.com/ehvalencia/EjemplosGo/EjemplosGo/goWeb/Api/internal/domain"
 	"github.com/ehvalencia/EjemplosGo/EjemplosGo/goWeb/Api/internal/products"
+	"github.com/ehvalencia/EjemplosGo/EjemplosGo/goWeb/Api/pkg/store"
 	"github.com/joho/godotenv"
 )
 
@@ -19,8 +20,15 @@ func main() {
 		panic(err)
 	}
 
-	var productsList = []domain.Product{}
-	loadProducts("/Users/edvalencia/Documents/GO/EjemplosGo/goWeb/Api/products.json", &productsList)
+	//var productsList = []domain.Product{}
+	//loadProducts("/Users/edvalencia/Documents/GO/EjemplosGo/goWeb/Api/products.json", &productsList)
+
+	// Extract products data from the JSON file
+	jsonStore := store.NewJsonStore("/Users/edvalencia/Documents/GO/EjemplosGo/goWeb/Api/products.json")
+	productsList, err := jsonStore.GetAll()
+	if err != nil {
+		panic(err)
+	}
 
 	repo := products.NewRepository(productsList)
 	service := products.NewService(repo)

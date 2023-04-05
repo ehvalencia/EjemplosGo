@@ -8,7 +8,14 @@ import (
 
 	"github.com/ehvalencia/EjemplosGo/EjemplosGo/goWeb/Api/internal/domain"
 	"github.com/ehvalencia/EjemplosGo/EjemplosGo/goWeb/Api/internal/products"
+	"github.com/ehvalencia/EjemplosGo/EjemplosGo/goWeb/Api/pkg/web"
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrInvalidId    = errors.New("invalid product id")
+	ErrInvalidPrice = errors.New("invalid product price")
+	ErrInvalidData  = errors.New("invalid product data")
 )
 
 type productHandler struct {
@@ -26,7 +33,8 @@ func NewProductHandler(s products.Service) *productHandler {
 func (h *productHandler) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		products, _ := h.s.GetAll()
-		c.JSON(200, products)
+		//c.JSON(200, products)
+		web.Success(c, 200, products)
 	}
 }
 
@@ -36,15 +44,15 @@ func (h *productHandler) GetByID() gin.HandlerFunc {
 		idParam := c.Param("id")
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
-			c.JSON(400, gin.H{"error": "invalid id"})
+			web.Failure(c, 400, ErrInvalidId)
 			return
 		}
 		product, err := h.s.GetByID(id)
 		if err != nil {
-			c.JSON(404, gin.H{"error": "product not found"})
+			web.Failure(c, 404, err)
 			return
 		}
-		c.JSON(200, product)
+		web.Success(c, 200, product)
 	}
 }
 
@@ -54,15 +62,15 @@ func (h *productHandler) Search() gin.HandlerFunc {
 		priceParam := c.Query("priceGt")
 		price, err := strconv.ParseFloat(priceParam, 64)
 		if err != nil {
-			c.JSON(400, gin.H{"error": "invalid price"})
+			web.Failure(c, 400, ErrInvalidPrice) //c.JSON(400, gin.H{"error": "invalid price"})
 			return
 		}
 		products, err := h.s.SearchPriceGt(price)
 		if err != nil {
-			c.JSON(404, gin.H{"error": "no products found"})
+			web.Failure(c, 404, err) //c.JSON(404, gin.H{"error": "no products found"})
 			return
 		}
-		c.JSON(200, products)
+		web.Success(c, 200, products) //c.JSON(200, products)
 	}
 }
 
